@@ -1,7 +1,6 @@
 'use strict';
 (function() {
     var myApp = angular.module('myApp', ['ngRoute', 'ngSanitize']);
-
     myApp.config(function($routeProvider) {
         $routeProvider
             .when('/', {
@@ -16,5 +15,4 @@
     myApp.run(function($rootScope, $location, $timeout) {
         $location.path('/');
     });
-
 }());
