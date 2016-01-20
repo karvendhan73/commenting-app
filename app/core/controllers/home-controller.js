@@ -8,6 +8,7 @@ var homeController = function ($scope, $rootScope, homeService, $timeout) {
     $rootScope.globalCounter = 0;
     $rootScope.isPageLoaded = false;
     $rootScope.caseSensitive = false;
+    $rootScope.setMaxCounter = 0;
 
     $scope.loadComments = function() {
         $scope.loader = true;

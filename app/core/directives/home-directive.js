@@ -40,6 +40,7 @@
         link: function (scope, element, attrs) {
             scope.isChildOpen = false;
             scope.deepCopy = angular.copy(scope.member.text);
+            scope.ChildCloseCounter = false;
             var commentedDate = $filter('date')(scope.member.date, 'M/d/yyyy/H/m/s').split('/');
 
             if (angular.isArray(scope.member.children)) {
@@ -55,7 +56,12 @@
              }, 60000);
 
             scope.$on('search', function(e, fromWatchFn) {
-
+              if ($rootScope.setMaxCounter == scope.counter && !scope.ChildCloseCounter) {
+                $rootScope.setMaxCounter = 0;
+              };
+              if (scope.ChildCloseCounter) {
+                $rootScope.setMaxCounter = scope.counter;
+              };
               if (fromWatchFn !== null && scope.counter == $rootScope.globalCounter) {
                 if (fromWatchFn) {
                   scope.isChildOpen = true;
@@ -65,7 +71,11 @@
                 };
               };
 
-              if (fromWatchFn == null && (scope.counter == 1 || scope.isChildOpen)) {
+              if (fromWatchFn && scope.isChildOpen && (scope.counter > $rootScope.globalCounter)) {
+                scope.replaceText();
+              }
+
+              if (fromWatchFn == null && (scope.counter == 1 || scope.isChildOpen && (!$rootScope.setMaxCounter || scope.counter <= $rootScope.setMaxCounter))) {
                 scope.replaceText();
               };
               
@@ -74,11 +84,13 @@
             scope.$watch('leveln', function() {
               $rootScope.globalCounter = scope.counter + 1;
               if (scope.leveln) {
+                scope.ChildCloseCounter = false;
                 $rootScope.isPageLoaded = true;
                 $timeout(function() {
                   scope.$broadcast('search', true);
                 }, 10);
               } else if ($rootScope.isPageLoaded) {
+                scope.ChildCloseCounter = true;
                 scope.$broadcast('search', false);
               };
             });
