@@ -1,0 +1,16 @@
+<section ng-controller="homeController" class="container-fluid">
+	<div class="align">
+		<button ng-click="loadComments()">Load Comments</button>
+	</div>
+	<div class="align" ng-show="comments.length && !loader">
+		<span class='chkbx'>
+			<input type="checkbox" id="c1" ng-model='caseSensitive'/>
+			<label for="c1" class='hover'><span></span>Case Sensitive</label>
+		</span>
+		<input type='text' id='search' placeholder='Search...' ng-model='searchText' ng-change='replaceWord()' autofocus='true'/>
+	</div>
+	<section class="s1 loader" ng-show='loader'></section>
+	<section class="s1" ng-show='!loader'>
+		<collection collection='comments' counter='0'></collection>
+	</section>
+</section>

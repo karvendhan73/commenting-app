@@ -1,0 +1,153 @@
+(function () {
+  "use strict";
+  angular.module("myApp").directive("homepageDir", [ function () {
+      return {
+        restrict: 'E',
+        transclude: true,
+        replace: true,
+        templateUrl: "app/core/html/home-template.html"
+      }
+    }
+  ])
+
+  .directive('collection', function () {
+    return {
+        restrict: "E",
+        replace: true,
+        scope: {
+            collection: '=',
+            counter: '='
+        },
+        template: "<ul class='add-border'><span ng-if='collection.length' class='label-dec'>{{setLabel}}</span><member ng-repeat='member in collection' member='member' counter=counter></member></ul>",
+        link: function (scope) {
+          if (!scope.counter) {
+              scope.setLabel = 'Parents';
+          } else {
+              scope.setLabel = 'Children - level ' + scope.counter;
+          };
+        }
+    };
+  })
+
+  .directive('member', function ($compile, $filter, $timeout, $rootScope) {
+    return {
+        restrict: "E",
+        replace: true,
+        scope: {
+            member: '=',
+            counter: '='
+        },
+        link: function (scope, element, attrs) {
+            scope.isChildOpen = false;
+            scope.deepCopy = angular.copy(scope.member.text);
+            var commentedDate = $filter('date')(scope.member.date, 'M/d/yyyy/H/m/s').split('/');
+
+            if (angular.isArray(scope.member.children)) {
+                scope.leveln = false;
+                scope.counter ++;
+
+                element.append("<span class='userLabel'>Commented By: {{member.user.lastName}}, {{member.user.firstName}}</span><span>{{name}}...</span><li ng-click='leveln = !leveln' class='highlight' ng-class=\"{'hover': member.children.length}\" ng-bind-html='member.text'></li><collection collection='member.children' ng-show='leveln' counter=counter></collection>"); 
+                $compile(element.contents())(scope)
+            };
+
+            setInterval(function() {
+              scope.setCommentString();
+             }, 60000);
+
+            scope.$on('search', function(e, fromWatchFn) {
+
+              if (fromWatchFn !== null && scope.counter == $rootScope.globalCounter) {
+                if (fromWatchFn) {
+                  scope.isChildOpen = true;
+                  scope.replaceText();
+                } else {
+                  scope.isChildOpen = false;
+                };
+              };
+
+              if (fromWatchFn == null && (scope.counter == 1 || scope.isChildOpen)) {
+                scope.replaceText();
+              };
+              
+            });
+
+            scope.$watch('leveln', function() {
+              $rootScope.globalCounter = scope.counter + 1;
+              if (scope.leveln) {
+                $rootScope.isPageLoaded = true;
+                $timeout(function() {
+                  scope.$broadcast('search', true);
+                }, 10);
+              } else if ($rootScope.isPageLoaded) {
+                scope.$broadcast('search', false);
+              };
+            });
+
+            scope.replaceText = function () {
+              scope.member.text = scope.deepCopy;
+              console.log(scope.member.text);
+              if ($rootScope.searchText) {
+                if ($rootScope.caseSensitive) {
+                  scope.match = new RegExp('(' + $rootScope.searchText + ')', "g");
+                } else {
+                  scope.match = new RegExp('(' + $rootScope.searchText + ')', "ig");
+                };
+                scope.member.text = scope.member.text.replace(scope.match, "<span class='highlight-text'>$1</span>");
+              };
+            };
+
+            scope.setCommentString = function () {
+              var month = Number(commentedDate[0]);
+              var day = Number(commentedDate[1]);
+              var year = Number(commentedDate[2]);
+              var hour = Number(commentedDate[3]);
+              var min = Number(commentedDate[4]);
+
+              var currentTime = $filter('date')(new Date(), 'M/d/yyyy/H/m/s').split('/');
+              var cmonth = Number(currentTime[0]);
+              var cday = Number(currentTime[1]);
+              var cyear = Number(currentTime[2]);
+              var chour = Number(currentTime[3]);
+              var cmin = Number(currentTime[4]);
+
+                if (year < cyear) {
+                  if (year == (cyear - 1)) {
+                      scope.name = 'An year ago';                
+                  } else {
+                      scope.name = (cyear - year) + ' years ago';                
+                  };
+                } else if (month < cmonth) {
+                  if (month == (cmonth - 1)) {
+                      scope.name = 'A month ago';                
+                  } else {
+                      scope.name = (cmonth - month) + ' months ago';                
+                  };
+                } else if (day < cday) {
+                  if (day == (cday - 1)) {
+                      scope.name = 'A day ago';                
+                  } else {
+                      scope.name = (cday - day) + ' days ago';                
+                  };
+                } else if (hour < chour) {
+                  if (hour == (chour - 1)) {
+                      scope.name = 'An hour ago';                
+                  } else {
+                      scope.name = (chour - hour) + ' hours ago';                
+                  };
+                } else if (min < cmin) {
+                  if (min == (cmin - 1)) {
+                      scope.name = 'A minute ago';                
+                  } else {
+                      scope.name = (cmin - min) + ' minutes ago';                
+                  };
+                } else {
+                  scope.name = 'A few seconds ago';
+                }; 
+                scope.$apply();
+            };
+            scope.setCommentString();
+        }
+    }
+  });
+
+}());
