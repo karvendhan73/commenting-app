@@ -2,40 +2,49 @@
 (function() {
 
 var homeController = function ($scope, $rootScope, homeService, $timeout) {
-    $scope.comments = {};
-    $scope.loader = '';
-    $rootScope.searchText = '';
-    $rootScope.globalCounter = 0;
-    $rootScope.isPageLoaded = false;
-    $rootScope.caseSensitive = false;
-    $rootScope.setMaxCounter = 0;
+    
+    $scope.initialize_ResetValues = function () {
+        $scope.comments = {};
+        $scope.loader = '';
+        $rootScope.globalObj = {
+            searchText: '',
+            globalCounter: 0,
+            isPageLoaded: false,
+            caseSensitive: false,
+            setMaxCounter: 0
+        };
+    };
 
     $scope.loadComments = function() {
+        $scope.initialize_ResetValues();
         $scope.loader = true;
-        $scope.comments = {};
-        $rootScope.searchText = '';
-        $rootScope.caseSensitive = false;
-
         homeService.getComments().then(function(response) {
             if (response.data) {
                 $scope.comments = angular.fromJson(response.data);
                 $scope.loader = false;
             };
         }, function(error) {});
-
-        $scope.replaceWord = function () {
-            var text = $rootScope.searchText;
-            $timeout(function() {
-                if (text == $rootScope.searchText) {
-                    $rootScope.$broadcast('search', null);
-                };
-            }, 500);
-        };
-
-        $scope.$watch('caseSensitive', function() {
-            $rootScope.$broadcast('search', null);
-        });
     };
+
+    $scope.replaceWord = function () {
+        var text = $rootScope.globalObj.searchText;
+        $timeout(function() {
+            if (text == $rootScope.globalObj.searchText) {
+                $rootScope.$broadcast('search', null);
+            };
+        }, 500);
+    };
+
+    $scope.$watch('globalObj.caseSensitive', function() {
+        $rootScope.$broadcast('search', null);
+    });
+
+    $scope.init = function () {
+        $scope.initialize_ResetValues();
+    };
+
+    $scope.init();
+
 };
 
 homeController.$inject = ["$scope", "$rootScope", "homeService", "$timeout"];

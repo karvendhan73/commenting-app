@@ -38,15 +38,14 @@
             counter: '='
         },
         link: function (scope, element, attrs) {
-            scope.isChildOpen = false;
             scope.deepCopy = angular.copy(scope.member.text);
-            scope.ChildCloseCounter = false;
+            scope.isChildOpened = false;
+            scope.isChildClosed = false;
             var commentedDate = $filter('date')(scope.member.date, 'M/d/yyyy/H/m/s').split('/');
 
             if (angular.isArray(scope.member.children)) {
                 scope.leveln = false;
                 scope.counter ++;
-
                 element.append("<span class='userLabel'>Commented By: {{member.user.lastName}}, {{member.user.firstName}}</span><span>{{name}}...</span><li ng-click='leveln = !leveln' class='highlight' ng-class=\"{'hover': member.children.length}\" ng-bind-html='member.text'></li><collection collection='member.children' ng-show='leveln' counter=counter></collection>"); 
                 $compile(element.contents())(scope)
             };
@@ -56,41 +55,41 @@
              }, 60000);
 
             scope.$on('search', function(e, fromWatchFn) {
-              if ($rootScope.setMaxCounter == scope.counter && !scope.ChildCloseCounter) {
-                $rootScope.setMaxCounter = 0;
+              if ($rootScope.globalObj.setMaxCounter == scope.counter || scope.counter == 1) {
+                $rootScope.globalObj.setMaxCounter = 0;
               };
-              if (scope.ChildCloseCounter) {
-                $rootScope.setMaxCounter = scope.counter;
+              if (scope.isChildClosed && !$rootScope.globalObj.setMaxCounter) {
+                $rootScope.globalObj.setMaxCounter = scope.counter;
               };
-              if (fromWatchFn !== null && scope.counter == $rootScope.globalCounter) {
+              if (fromWatchFn !== null && scope.counter == $rootScope.globalObj.globalCounter) {
                 if (fromWatchFn) {
-                  scope.isChildOpen = true;
+                  scope.isChildOpened = true;
                   scope.replaceText();
                 } else {
-                  scope.isChildOpen = false;
+                  scope.isChildOpened = false;
                 };
               };
 
-              if (fromWatchFn && scope.isChildOpen && (scope.counter > $rootScope.globalCounter)) {
+              if (fromWatchFn && scope.isChildOpened && (scope.counter > $rootScope.globalObj.globalCounter) && (!$rootScope.globalObj.setMaxCounter || scope.counter <= $rootScope.globalObj.setMaxCounter)) {
                 scope.replaceText();
               }
 
-              if (fromWatchFn == null && (scope.counter == 1 || scope.isChildOpen && (!$rootScope.setMaxCounter || scope.counter <= $rootScope.setMaxCounter))) {
+              if (fromWatchFn == null && (scope.counter == 1 || scope.isChildOpened && (!$rootScope.globalObj.setMaxCounter || scope.counter <= $rootScope.globalObj.setMaxCounter))) {
                 scope.replaceText();
               };
               
             });
 
             scope.$watch('leveln', function() {
-              $rootScope.globalCounter = scope.counter + 1;
+              $rootScope.globalObj.globalCounter = scope.counter + 1;
               if (scope.leveln) {
-                scope.ChildCloseCounter = false;
-                $rootScope.isPageLoaded = true;
+                scope.isChildClosed = false;
+                $rootScope.globalObj.isPageLoaded = true;
                 $timeout(function() {
                   scope.$broadcast('search', true);
                 }, 10);
-              } else if ($rootScope.isPageLoaded) {
-                scope.ChildCloseCounter = true;
+              } else if ($rootScope.globalObj.isPageLoaded) {
+                scope.isChildClosed = true;
                 scope.$broadcast('search', false);
               };
             });
@@ -98,11 +97,11 @@
             scope.replaceText = function () {
               scope.member.text = scope.deepCopy;
               console.log(scope.member.text);
-              if ($rootScope.searchText) {
-                if ($rootScope.caseSensitive) {
-                  scope.match = new RegExp('(' + $rootScope.searchText + ')', "g");
+              if ($rootScope.globalObj.searchText) {
+                if ($rootScope.globalObj.caseSensitive) {
+                  scope.match = new RegExp('(' + $rootScope.globalObj.searchText + ')', "g");
                 } else {
-                  scope.match = new RegExp('(' + $rootScope.searchText + ')', "ig");
+                  scope.match = new RegExp('(' + $rootScope.globalObj.searchText + ')', "ig");
                 };
                 scope.member.text = scope.member.text.replace(scope.match, "<span class='highlight-text'>$1</span>");
               };
