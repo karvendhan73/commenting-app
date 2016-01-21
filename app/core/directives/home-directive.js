@@ -99,7 +99,7 @@
 
             scope.replaceText = function () {
               scope.member.text = scope.deepCopy;
-              console.log(scope.member.text);
+              //console.log(scope.member.text);
               if ($rootScope.globalObj.searchText) {
                 if ($rootScope.globalObj.caseSensitive) {
                   scope.match = new RegExp('(' + $rootScope.globalObj.searchText + ')', "g");
