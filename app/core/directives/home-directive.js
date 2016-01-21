@@ -55,12 +55,15 @@
              }, 60000);
 
             scope.$on('search', function(e, fromWatchFn) {
-              if ($rootScope.globalObj.setMaxCounter == scope.counter || scope.counter == 1) {
+
+              if (scope.counter == 1 || $rootScope.globalObj.setMaxCounter == scope.counter || (fromWatchFn && scope.counter == $rootScope.globalObj.globalCounter - 1)) {
                 $rootScope.globalObj.setMaxCounter = 0;
               };
+
               if (scope.isChildClosed && !$rootScope.globalObj.setMaxCounter) {
                 $rootScope.globalObj.setMaxCounter = scope.counter;
               };
+
               if (fromWatchFn !== null && scope.counter == $rootScope.globalObj.globalCounter) {
                 if (fromWatchFn) {
                   scope.isChildOpened = true;
@@ -72,7 +75,7 @@
 
               if (fromWatchFn && scope.isChildOpened && (scope.counter > $rootScope.globalObj.globalCounter) && (!$rootScope.globalObj.setMaxCounter || scope.counter <= $rootScope.globalObj.setMaxCounter)) {
                 scope.replaceText();
-              }
+              };
 
               if (fromWatchFn == null && (scope.counter == 1 || scope.isChildOpened && (!$rootScope.globalObj.setMaxCounter || scope.counter <= $rootScope.globalObj.setMaxCounter))) {
                 scope.replaceText();
