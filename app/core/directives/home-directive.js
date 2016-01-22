@@ -46,7 +46,7 @@
             if (angular.isArray(scope.member.children)) {
                 scope.leveln = false;
                 scope.counter ++;
-                element.append("<span class='userLabel'>Commented By: {{member.user.lastName}}, {{member.user.firstName}}</span><span>{{name}}...</span><li ng-click='leveln = !leveln' class='highlight' ng-class=\"{'hover': member.children.length}\" ng-bind-html='member.text'></li><collection collection='member.children' ng-show='leveln' counter=counter></collection>"); 
+                element.append("<span class='userLabel'>Commented By: {{member.user.lastName}}, {{member.user.firstName}}</span><span>{{name}}...</span><li ng-click='leveln = !leveln' class='highlight' ng-class=\"{'hover': member.children.length}\" ng-bind-html='member.text'></li><collection collection='member.children' ng-show='leveln' counter=counter class='animate-show'></collection>"); 
                 $compile(element.contents())(scope)
             };
 

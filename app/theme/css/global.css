@@ -36,3 +36,14 @@ input[type="checkbox"]:checked + label span {
     background:url(../images/check_radio_sheet.png) -19px top no-repeat;
 }
 .chkbx {margin-bottom: 5px;}
+.ng-hide-add, .ng-hide-remove {
+    /* ensure visibility during the transition */
+    display: block !important; /* yes, important */
+}
+.animate-show {
+  transition: .1s linear all;
+  opacity:1;
+}
+.animate-show.ng-hide {
+  opacity:0;
+}
