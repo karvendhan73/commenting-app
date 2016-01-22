@@ -29,7 +29,7 @@
     };
   })
 
-  .directive('member', function ($compile, $filter, $timeout, $rootScope) {
+  .directive('member', function ($compile, $rootScope, $filter, $timeout, $interval) {
     return {
         restrict: "E",
         replace: true,
@@ -50,7 +50,7 @@
                 $compile(element.contents())(scope)
             };
 
-            setInterval(function() {
+            $interval(function() {
               scope.setCommentString();
              }, 60000);
 
